@@ -1,6 +1,18 @@
 #!/bin/bash
 
+====================================================
+| MCMgmt for Paper
+| (c) Nathan "nwb99" Barnett, see LICENSE
+| version 0.1.1
+|
+|
+|
+|
+|
+====================================================
+
 WORLDS=(world world_nether world_the_end)
+STARTSCRIPT=startpaper.sh
 PAPERDIR=paper
 SERVERROOT=/mc
 BACKUPDIR=/home/minecraft
@@ -14,7 +26,7 @@ then
 fi
 
 is_running() {
-	if ! pgrep -x startpaper.sh > /dev/null
+	if ! pgrep -x $STARTSCRIPT > /dev/null
 	then
 		echo "Paper isn't running."
 		exit 1
