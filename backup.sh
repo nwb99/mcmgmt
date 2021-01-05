@@ -29,6 +29,7 @@ fi
 if [ "$(stat -c "%a" "$BACKUPDIR")" -lt "700" ]
 then
 	echo -e "Directory $BACKUPDIR does not have the proper permissions!\nEnsure that the directory has at least permissions of 700 or dwrx------"
+	exit 1
 
 fi
 
