@@ -51,7 +51,7 @@ screen_saveon() {
 }
 
 screen_say() {
-	screen_command "say [$(date +%H:%M:%S)] $1"
+	screen_command "say §c[$(date +%H:%M:%S)] §7$1"
 }
 
 online_backup() {
