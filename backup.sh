@@ -3,7 +3,7 @@
 #====================================================
 # MCMgmt for Paper
 # (c) Nathan "nwb99" Barnett, see LICENSE
-# version 0.1.1
+# version 0.1.2
 #
 #
 #
@@ -15,8 +15,9 @@ WORLDS=(world world_nether world_the_end)
 STARTSCRIPT=startpaper.sh
 PAPERDIR=paper
 SERVERROOT=/mc
-BACKUPDIR=/home/minecraft
+BACKUPDIR=/hdd/paper_backup
 SCREENNAME=mc
+DAYSDELETE=3
 LOGFILE=${SERVERROOT}/${PAPERDIR}/logs/latest.log
 
 if [ ! -d $SERVERROOT/$PAPERDIR/ ]
@@ -30,7 +31,6 @@ if [ "$(stat -c "%a" "$BACKUPDIR")" -lt "700" ]
 then
 	echo -e "Directory $BACKUPDIR does not have the proper permissions!\nEnsure that the directory has at least permissions of 700 or dwrx------"
 	exit 1
-
 fi
 
 is_running() {
@@ -91,8 +91,14 @@ players_online() {
 	fi
 }
 
+prune_backups() {
+	echo "Pruning any backups older than $DAYSDELETE days old."
+	find $BACKUPDIR -maxdepth 1 -name "papermc-*.tar.gz" -mtime +$DAYSDELETE -delete
+}
+
 is_running
 players_online
+prune_backups
 
 screen_command "save-on"	# keeps tail from hanging if save was already off.
 
