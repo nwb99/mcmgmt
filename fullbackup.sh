@@ -90,7 +90,7 @@ fullbackup() {
 }
 
 countdown() {
-	declare -a COUNTTIME=("120" "90" "60" "30")
+	declare -a COUNTTIME=("120" "90" "60" "30")		# think about why this has to be 30 second intervals. change as you please.
 	for i in "${COUNTTIME[@]}"
 	do
 		screen_say "Server will shutdown in $i seconds for full backup."
@@ -106,8 +106,16 @@ players_online() {
 	fi
 }
 
+prune_backups() {
+	echo "Pruning any backups older than $DAYSDELETE days old."
+	find $BACKUPDIR -maxdepth 1 -name "papermc-*.tar.gz" -mtime +$DAYSDELETE -delete
+}
+
 #####################################################
 # Check to see if Paper is running.
+
+prune_backups
+
 if ! pgrep -x $STARTSCRIPT > /dev/null
 then
 	echo "Paper isn't running."
