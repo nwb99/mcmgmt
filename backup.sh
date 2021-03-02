@@ -3,7 +3,7 @@
 #====================================================
 # MCMgmt for Paper
 # (c) Nathan "nwb99" Barnett, see LICENSE
-# version 0.1.3
+# version 0.1.3dev1
 #
 #
 #
@@ -21,7 +21,7 @@ DAYSDELETE=3							# Number of days to keep backups. (Ex: 3 keeps until day 4!)
 PIGZCORES=4								# Set the number of CPU cores to use for compression
 LOGFILE=${SERVERROOT}/${PAPERDIR}/logs/latest.log
 
-VER='0.1.3dev'
+VER='0.1.3dev1'
 
 if [ $(id -u) -eq 0 ]					# check that we aren't running as root.	
 then
@@ -94,7 +94,7 @@ screen_say() {
 }
 
 online_backup() {
-	TARBALL="papermc-$(pgrep -a java | cut -d ' ' -f 6 | cut -c 7-9)-worlds-$(date +%d%b%Y-%H%M).tar.gz"
+	TARBALL="papermc-$(pgrep -a java | egrep -o 'paper-[0-9]+' | egrep -o '[0-9]+')-worlds-$(date +%d%b%Y-%H%M).tar.gz"
 	tar -cf - -C $SERVERROOT/$PAPERDIR ${WORLDS[*]} | pigz -c6p $PIGZCORES > $BACKUPDIR/$TARBALL
 }
 
