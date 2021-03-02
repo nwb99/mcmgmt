@@ -49,6 +49,7 @@ fi
 if ! [ -w "$BACKUPDIR" ]
 then
 	echo "MCMgmt Backup has insufficient permissions to write to $BACKUPDIR."
+fi
 
 
 is_running() {
