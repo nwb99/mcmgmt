@@ -3,7 +3,7 @@
 #====================================================
 # MCMgmt for Paper
 # (c) Nathan "nwb99" Barnett, see LICENSE
-# version 0.1.3dev1
+# version 0.1.3dev3
 #
 #
 #
@@ -21,7 +21,7 @@ DAYSDELETE=3							# Number of days to keep backups. (Ex: 3 keeps until day 4!)
 PIGZCORES=4								# Set the number of CPU cores to use for compression
 LOGFILE=${SERVERROOT}/${PAPERDIR}/logs/latest.log
 
-VER='0.1.3dev1'
+VER='0.1.3dev3'
 
 if [ $(id -u) -eq 0 ]					# check that we aren't running as root.	
 then
