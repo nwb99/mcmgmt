@@ -3,7 +3,7 @@
 #====================================================
 # MCMgmt for Paper
 # (c) Nathan "nwb99" Barnett, see LICENSE
-# version 0.1.3
+# version 0.2.0
 # Full Backup
 #
 # This script stops Paper and runs a backup
@@ -19,8 +19,6 @@ DAYSDELETE=
 PIGZCORES=
 LOGFILE=${SERVERROOT}/${PAPERDIR}/logs/latest.log
 BACKUPDIR=
-
-PAPERBUILD=$(pgrep -a java | cut -d ' ' -f 6 | cut -c 7-9)
 
 # Check if the script is being run as root
 if [ $(id -u) -eq 0 ]
@@ -84,8 +82,7 @@ stoppaper() {
 }
 
 fullbackup() {
-	# for the love of god pls learn regex or something and don't abuse piping cut since this is a bug anyway
-	local TARBALL="papermc-$PAPERBUILD-full-$(date +%d%b%Y-%H%M).tar.gz"
+	local TARBALL="papermc-full-$(date +%d%b%Y-%H%M).tar.gz"
 	tar -cf - -C $SERVERROOT $PAPERDIR/ | pigz -c${COMPRESSION}p $PIGZCORES > $BACKUPDIR/$TARBALL
 }
 
