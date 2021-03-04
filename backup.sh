@@ -3,7 +3,7 @@
 #====================================================
 # MCMgmt for Paper
 # (c) Nathan "nwb99" Barnett, see LICENSE
-# version 0.1.2
+# version 0.2.0
 #
 #
 #
@@ -11,14 +11,34 @@
 #
 #====================================================
 
-WORLDS=(world world_nether world_the_end)
-STARTSCRIPT=startpaper.sh
-PAPERDIR=paper
-SERVERROOT=/mc
-BACKUPDIR=/hdd/paper_backup
+WORLDS=(world world_nether world_the_end)	# Array of world directories to back up.
+STARTSCRIPT=startpaper.sh				# Paper start script. Used to check if Paper is running.
+PAPERDIR=paper							# No trailing /
+SERVERROOT=/mc							# No trailing /
+BACKUPDIR=/hdd/paper_backup				# No trailing /
 SCREENNAME=mc
-DAYSDELETE=3
+DAYSDELETE=3							# Number of days to keep backups. (Ex: 3 keeps until day 4!)
+PIGZCORES=4								# Set the number of CPU cores to use for compression
 LOGFILE=${SERVERROOT}/${PAPERDIR}/logs/latest.log
+
+VER='0.2.0'
+
+if [ $(id -u) -eq 0 ]					# check that we aren't running as root.	
+then
+	echo "Do not run this script as root!"
+	exit 1
+fi
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]
+then
+	cat<<-EOF
+	MCMgmt for Paper Online Backup $VER
+	
+	-h, --help		Displays this help
+	-f			Forces backup even if no players are online
+	EOF
+	exit 0
+fi
 
 if [ ! -d $SERVERROOT/$PAPERDIR/ ]
 then
@@ -26,12 +46,11 @@ then
 	exit 1
 fi
 
-# Check that backup directory has at least RWX permissions for the directory owner.
-if [ "$(stat -c "%a" "$BACKUPDIR")" -lt "700" ]
+if ! [ -w "$BACKUPDIR" ]
 then
-	echo -e "Directory $BACKUPDIR does not have the proper permissions!\nEnsure that the directory has at least permissions of 700 or dwrx------"
-	exit 1
+	echo "MCMgmt Backup has insufficient permissions to write to $BACKUPDIR."
 fi
+
 
 is_running() {
 	if ! pgrep -x $STARTSCRIPT > /dev/null
@@ -76,8 +95,8 @@ screen_say() {
 }
 
 online_backup() {
-	TARBALL="papermc-$(pgrep -a java | cut -d ' ' -f 6 | cut -c 7-9)-worlds-$(date +%d%b%Y-%H%M).tar.gz"
-	tar -cf - -C $SERVERROOT/$PAPERDIR ${WORLDS[*]} | pigz -c6p 2 > $BACKUPDIR/$TARBALL
+	TARBALL="papermc-$(pgrep -a java | egrep -o 'paper-[0-9]+' | egrep -o '[0-9]+')-worlds-$(date +%d%b%Y-%H%M).tar.gz"
+	tar -cf - -C $SERVERROOT/$PAPERDIR ${WORLDS[*]} | pigz -c6p $PIGZCORES > $BACKUPDIR/$TARBALL
 }
 
 players_online() {
@@ -97,7 +116,10 @@ prune_backups() {
 }
 
 is_running
-players_online
+if ! [ "$1" = "-f" ]
+then
+	players_online
+fi
 prune_backups
 
 screen_command "save-on"	# keeps tail from hanging if save was already off.
