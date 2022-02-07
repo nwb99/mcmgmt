@@ -3,7 +3,8 @@
 #====================================================
 # MCMgmt for Paper
 # (c) Nathan "nwb99" Barnett, see LICENSE
-# version 0.2.0
+# MIT License
+# version 0.2.1dev
 #
 #
 #
@@ -14,16 +15,16 @@
 WORLDS=(world world_nether world_the_end)	# Array of world directories to back up.
 STARTSCRIPT=startpaper.sh				# Paper start script. Used to check if Paper is running.
 PAPERDIR=paper							# No trailing /
-SERVERROOT=/mc							# No trailing /
-BACKUPDIR=/hdd/paper_backup				# No trailing /
+SERVERROOT=/home/minecraft/paper		# No trailing /
+BACKUPDIR=/mc/paper_backup				# No trailing /
 SCREENNAME=mc
 DAYSDELETE=3							# Number of days to keep backups. (Ex: 3 keeps until day 4!)
 PIGZCORES=4								# Set the number of CPU cores to use for compression
-LOGFILE=${SERVERROOT}/${PAPERDIR}/logs/latest.log
+LOGFILE="${SERVERROOT}/${PAPERDIR}/logs/latest.log"
 
-VER='0.2.0'
+VER='0.2.1dev'
 
-if [ $(id -u) -eq 0 ]					# check that we aren't running as root.	
+if [ "$(id -u)" -eq 0 ]					# check that we aren't running as root.	
 then
 	echo "Do not run this script as root!"
 	exit 1
@@ -40,7 +41,7 @@ then
 	exit 0
 fi
 
-if [ ! -d $SERVERROOT/$PAPERDIR/ ]
+if [ ! -d "$SERVERROOT/$PAPERDIR/" ]
 then
 	echo "Server directory does not exist."
 	exit 1
@@ -49,6 +50,7 @@ fi
 if ! [ -w "$BACKUPDIR" ]
 then
 	echo "MCMgmt Backup has insufficient permissions to write to $BACKUPDIR."
+	exit 1
 fi
 
 
@@ -95,13 +97,13 @@ screen_say() {
 }
 
 online_backup() {
-	TARBALL="papermc-$(pgrep -a java | egrep -o 'paper-[0-9]+' | egrep -o '[0-9]+')-worlds-$(date +%d%b%Y-%H%M).tar.gz"
-	tar -cf - -C $SERVERROOT/$PAPERDIR ${WORLDS[*]} | pigz -c6p $PIGZCORES > $BACKUPDIR/$TARBALL
+	TARBALL="papermc-$(pgrep -a java | grep -Eo 'paper-[0-9]+' | grep -Eo '[0-9]+')-worlds-$(date +%d%b%Y-%H%M).tar.gz"
+	tar -cf - -C "$SERVERROOT/$PAPERDIR" "${WORLDS[*]}" | pigz -c6p $PIGZCORES > "$BACKUPDIR/$TARBALL"
 }
 
 players_online() {
 	screen_command "list"
-	if [ $(tail -F -n0 -s 0.1 $LOGFILE | grep -m1 "INFO]: There are" | cut -d ' ' -f 6) -ge 1 ]
+	if [ "$(tail -F -n0 -s 0.1 -- "$LOGFILE" | grep -m1 "INFO]: There are" | cut -d ' ' -f 6)" -ge 1 ]
 	then
 		return 0
 	else
@@ -112,7 +114,8 @@ players_online() {
 
 prune_backups() {
 	echo "Pruning any backups older than $DAYSDELETE days old."
-	find $BACKUPDIR -maxdepth 1 -name "papermc-*.tar.gz" -mtime +$DAYSDELETE -delete
+	# potential for find to fail if $BACKUPDIR name begins with '-'.
+	find "$BACKUPDIR" -maxdepth 1 -name "papermc-*.tar.gz" -mtime +$DAYSDELETE -delete
 }
 
 is_running
@@ -152,7 +155,7 @@ then
 else
 	echo "Backup failed."
 	screen_saveon
-	[ -f $BACKUPDIR/$TARBALL ] && rm $BACKUPDIR/$TARBALL
+	[ -f "$BACKUPDIR/$TARBALL" ] && rm -f -- "$BACKUPDIR/$TARBALL"
 	exit 1
 fi
 
