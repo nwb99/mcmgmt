@@ -3,7 +3,7 @@
 #====================================================
 # MCMgmt for Paper
 # (c) Nathan "nwb99" Barnett, see LICENSE
-# version 0.2.0
+# version 0.2.1dev
 # Full Backup
 #
 # This script stops Paper and runs a backup
@@ -17,11 +17,11 @@ PAPERDIR=
 SERVERROOT=
 DAYSDELETE=
 PIGZCORES=
-LOGFILE=${SERVERROOT}/${PAPERDIR}/logs/latest.log
+LOGFILE="${SERVERROOT}/${PAPERDIR}/logs/latest.log"
 BACKUPDIR=
 
 # Check if the script is being run as root
-if [ $(id -u) -eq 0 ]
+if [ "$(id -u)" -eq 0 ]
 then
 	echo "Do not run this script as root!"
 	exit 1
@@ -47,7 +47,7 @@ fi
 
 #####################################################
 read_log() {											#come up with a better way to check logs
-	tail -F -n0 -s 0.1 $LOGFILE | grep -q -m1 "$1"		# This does not return any strings. It only returns an error code.
+	tail -F -n0 -s 0.1 "$LOGFILE" | grep -q -m1 "$1"		# This does not return any strings. It only returns an error code.
 }
 
 screen_say() {
@@ -82,8 +82,9 @@ stoppaper() {
 }
 
 fullbackup() {
-	local TARBALL="papermc-full-$(date +%d%b%Y-%H%M).tar.gz"
-	tar -cf - -C $SERVERROOT $PAPERDIR/ | pigz -c${COMPRESSION}p $PIGZCORES > $BACKUPDIR/$TARBALL
+	local TARBALL
+	TARBALL="papermc-full-$(date +%d%b%Y-%H%M).tar.gz"
+	tar -cf - -C "$SERVERROOT $PAPERDIR/" | pigz -c${COMPRESSION}p $PIGZCORES > "$BACKUPDIR/$TARBALL"
 }
 
 countdown() {
@@ -97,7 +98,7 @@ countdown() {
 
 players_online() {
 	screen_command "list"
-	if [ $(tail -F -n0 -s 0.1 $LOGFILE | grep -m1 "INFO]: There are" | cut -d ' ' -f 6) -ge 1 ]
+	if [ "$(tail -F -n0 -s 0.1 "$LOGFILE" | grep -m1 'INFO]: There are' | cut -d ' ' -f 6)" -ge 1 ]
 	then
 		countdown
 	fi
@@ -105,7 +106,8 @@ players_online() {
 
 prune_backups() {
 	echo "Pruning any backups older than $DAYSDELETE days old."
-	find $BACKUPDIR -maxdepth 1 -name "papermc-*.tar.gz" -mtime +$DAYSDELETE -delete
+	# potential for find to fail if $BACKUPDIR begins with a '-'
+	find "$BACKUPDIR" -maxdepth 1 -name "papermc-*.tar.gz" -mtime +$DAYSDELETE -delete
 }
 
 #####################################################
@@ -113,7 +115,7 @@ prune_backups() {
 
 prune_backups
 
-if ! pgrep -x $STARTSCRIPT > /dev/null
+if ! pgrep -x "$STARTSCRIPT" > /dev/null
 then
 	echo "Paper isn't running."
 	if fullbackup
